@@ -1,5 +1,5 @@
 ---
-title: "Boundary lines for yield gap analysis, revisiting Fermont et al. (2009)"
+title: "Boundary lines for yield gap analysis: Revisiting Fermont et al. (2009)"
 author:
 - Tomás Roquette Tenreiro$^a$ (PhD) and João Vasco Silva$^b$ (PhD)
 - $^a$SISTAGRO - Systems Engineering in Agriculture
