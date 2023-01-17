@@ -1,7 +1,7 @@
 ---
 title: "Boundary lines for yield gap analysis, revisiting Fermont et al. (2009)"
 author:
-- Tomás Roquette Tenreiro$^a$ (PhD) and João Vasco Silva$^a$ (PhD)
+- Tomás Roquette Tenreiro$^a$ (PhD) and João Vasco Silva$^b$ (PhD)
 - $^a$SISTAGRO - Systems Engineering in Agriculture
 - $^b$CIMMYT-Zimbabwe & WUR-PPS
 date: "`r format(Sys.time(), '%d-%B-%Y')`"
@@ -51,7 +51,7 @@ First, we need to load the R packages needed to run this workflow.
 
 ```{r, warning=FALSE}
 # package names
-packages <- c("frontier", "dplyr", "tidyr", "knitr", "car", "RColorBrewer", "DT")
+packages <- c("splines", "Metrics", "dplyr", "tidyr", "knitr", "reshape2", "ggplot2", "DT")
 
 # install packages
 installed_packages <- packages %in% rownames(installed.packages())
@@ -70,11 +70,11 @@ ___
 
 ```{r}
 # read .csv file with data
-file <- 'https://raw.githubusercontent.com/jvasco323/EiA_YGD_workflow/main/data-wheat-ethiopia.csv'
+file <- 'https://raw.githubusercontent.com/jvasco323/EiA_BLA_workflow/main/fermont_etal_final.csv'
 data <- read.csv(url(file))
 
 # list variables of interest
-# str(data)
+str(data)
 ```
 
 ___
@@ -85,7 +85,7 @@ explain code below. Other things is to look at input variables, NA etc. Give adv
 
 ```{r}
 # remove outliers
-# data <- subset(raw_data, yld_t0 < 30)
+data <- subset(data, yld_t0 < 30)
 ```
 
 ___
@@ -95,48 +95,47 @@ ___
 **ADJUST TEXT TO THE PRINTED TABLE BELOW** Descriptive statistics of the actual yield and (continuous) crop management variables used in the analysis for the 2 years of the survey are provided below. Actual yield of wheat across Ethiopia was on average 1.76 t/ha in 2009 and 1.77 t/ha in 2013. N and P application rates were on average 48 kg N/ha and 20 kg P/ha, respectively. Plot sizes were on average 0.45 ha in 2009 and 0.40 ha in 2013.
 
 ```{r, echo=FALSE, warning=FALSE}
-#vars3 <- c('year', 'handweeding_persdayha', 'herb_lha', 'pfert_kgha', 'nfert_kgha', 'seed_kgha', 'subplotsize_ha', 'yield_tha')
+vars3 <- c('year', 'RF_tot', 'clay', 'pH_soil', 'SOC', 'days_to_harvest', 'yld_t0')
 # mean
-#numeric_cols_mean <- data[,vars3] %>%
-#  group_by(year) %>%
-#  summarise(across(
-#    .cols = where(is.numeric), 
-#    .fns = list(Mean = mean), na.rm = TRUE, 
-#    .names = "{col}"))
-#numeric_cols_mean <- round(numeric_cols_mean, 2)
-#numeric_cols_mean <- t(numeric_cols_mean)
-#colnames(numeric_cols_mean)[2] <- 'Mean 2013'
-#colnames(numeric_cols_mean)[1] <- 'Mean 2009'
-#numeric_cols_mean = numeric_cols_mean[-1,]
-#Variable <- rownames(numeric_cols_mean)
-#rownames(numeric_cols_mean) <- NULL
-#numeric_cols_mean <- cbind(Variable, numeric_cols_mean)
+numeric_cols_mean <- data[,vars3] %>%
+  group_by(year) %>%
+  summarise(across(
+    .cols = where(is.numeric), 
+    .fns = list(Mean = mean), na.rm = TRUE, 
+    .names = "{col}"))
+numeric_cols_mean <- round(numeric_cols_mean, 1)
+numeric_cols_mean <- t(numeric_cols_mean)
+colnames(numeric_cols_mean)[2] <- 'Mean 2005'
+colnames(numeric_cols_mean)[1] <- 'Mean 2004'
+numeric_cols_mean = numeric_cols_mean[-1,]
+Variable <- rownames(numeric_cols_mean)
+rownames(numeric_cols_mean) <- NULL
+numeric_cols_mean <- cbind(Variable, numeric_cols_mean)
 # sd
-#numeric_cols_sd <- data[,vars3] %>%
-#  group_by(year) %>%
-#  summarise(across(
-#    .cols = where(is.numeric), 
-#    .fns = list(SD = sd), na.rm = TRUE, 
-#    .names = "{col}"))
-#numeric_cols_sd <- round(numeric_cols_sd, 2)
-#numeric_cols_sd <- t(numeric_cols_sd)
-#colnames(numeric_cols_sd)[2] <- 'StDev 2013'
-#colnames(numeric_cols_sd)[1] <- 'StDev 2009'
-#numeric_cols_sd = numeric_cols_sd[-1,]
-#Variable <- rownames(numeric_cols_sd)
-#rownames(numeric_cols_sd) <- NULL
-#numeric_cols_sd <- cbind(Variable, numeric_cols_sd)
+numeric_cols_sd <- data[,vars3] %>%
+  group_by(year) %>%
+  summarise(across(
+    .cols = where(is.numeric), 
+    .fns = list(SD = sd), na.rm = TRUE, 
+    .names = "{col}"))
+numeric_cols_sd <- round(numeric_cols_sd, 1)
+numeric_cols_sd <- t(numeric_cols_sd)
+colnames(numeric_cols_sd)[2] <- 'StDev 2005'
+colnames(numeric_cols_sd)[1] <- 'StDev 2004'
+numeric_cols_sd = numeric_cols_sd[-1,]
+Variable <- rownames(numeric_cols_sd)
+rownames(numeric_cols_sd) <- NULL
+numeric_cols_sd <- cbind(Variable, numeric_cols_sd)
 # merge
-#numeric_cols = merge(numeric_cols_mean, numeric_cols_sd, by='Variable')
-#numeric_cols$Variable[1] <- 'Hand-weeding (person-day/ha)'
-#numeric_cols$Variable[2] <- 'Herbicide use (L/ha)'
-#numeric_cols$Variable[3] <- 'N application rate (kg N/ha)'
-#numeric_cols$Variable[4] <- 'P application rate (kg P/ha)'
-#numeric_cols$Variable[5] <- 'Seed rate (kg/ha)'
-#numeric_cols$Variable[6] <- 'Plot size (ha)'
-#numeric_cols$Variable[7] <- 'Actual wheat yield (t/ha)'
+numeric_cols = merge(numeric_cols_mean, numeric_cols_sd, by='Variable')
+numeric_cols$Variable[1] <- 'Soil clay content (%)'
+numeric_cols$Variable[2] <- 'Days to harvest (d)'
+numeric_cols$Variable[3] <- 'Soil pH'
+numeric_cols$Variable[4] <- 'Growing season rainfall (mm)'
+numeric_cols$Variable[5] <- 'Soil organic C (mg/kg)'
+numeric_cols$Variable[6] <- 'Cassava yield (t/ha)'
 # show
-#knitr::kable(numeric_cols)
+knitr::kable(numeric_cols)
 ```
 
 ___
@@ -210,17 +209,130 @@ ___
 
 # **Step 2: Boundary lines**
 
+**Please describe the function below step by step** 
+
+First we select the variables for which BL will be fitted. Please explain different ways on how to do this!!! and which criteria should be used for that+ what Fermont did.
+
+```{r, warning=FALSE}
+#variaveis <- c("pH_soil", "SOC", "totN_soil", "P_soil", "K_soil", "CBB_T0_9",
+               #"CGM_T0_9", "RF_tot", "RF0_6M", "RF_.d", "clay", "days_to_harvest")
+variaveis <- c("pH_soil", "totN_soil", "P_soil", "clay")
+```
+
+Second we create empty dataframes to store data (be specific which data etc)
+
+```{r, warning=FALSE}
+blp_new <- c()
+data_new <- c()
+rmse_df <- c()
+```
+
+Explain all steps in the loop below. 1st why we loop. And from there explain each of the six steps. [[I NEED TO FIND A WAY TO PLOT THE FIGURES TOGETHER, OUT OF THE LOOP]]
+
+```{r, warning=FALSE}
+for(i in unique(variaveis)){
+  # print(i)
+  
+  # 1) selecionar data
+  data_subset <- data[,c("year", "Trial", "Site", "Farm.no.", "yld_t0", i)]
+  colnames(data_subset)[5] = "Y"
+  colnames(data_subset)[6] = "X"
+  data_subset$variable <- i
+  
+  # 2) estimar pontos de fronteira
+  data.bla <- bl_points(data, i, approach="maximum")
+  data.bla$variable <- i
+  
+  # 3) estimar regressao
+  model <- glm(Y ~ ns(X, df = 2), data = data.bla)
+  # print(model)
+  
+  # 4) predict y_max
+  # boundary points only
+  data.bla$y_pred <- predict(model, newdata = data.bla)
+  # raw data
+  data_subset$y_pred <- predict(model, newdata = data_subset)
+
+  # 5) ERROR assessment
+  rmse_value <- rmse(data.bla$Y, data.bla$y_pred)
+  
+  # for plotting
+  # (para melhorar, meter plots fora do loop)
+  plot_lims <- range(data_subset$X, na.rm=T)
+  plot.grid <- seq(from=plot_lims[1], to=plot_lims[2])
+  pred <- predict(model, newdata=list(X=plot.grid), se=T)
+  spline.d <- as.data.frame(spline(data.bla$X, data.bla$y_pred))
+  xmin <- min(data_subset$X)
+  xmax <- max(data_subset$X)
+  ymax <- max(data_subset$Y)
+  g1 <- ggplot(data.bla, aes(x=X, y=y_pred)) + 
+    geom_point(size=6, alpha=0.6, color="blue") +
+    geom_point(data=data.bla, aes(x=X, y=Y), size=3, alpha=0.9, color="red") +
+    geom_point(data=data_subset, aes(x=X, y=Y)) +
+    coord_cartesian(xlim=c(xmin-2, xmax), ylim=c(0, ymax+5)) + 
+    labs(title="BOUNDARY LINE ", subtitle="Spline method - Shatar & Mcbratney. (2004)", y="YIELD_tha",
+         x="X", caption="[BL from 10 groups]") + 
+    theme_bw() + 
+    theme(text = element_text(size=15)) +
+    geom_line(data = spline.d, aes(x = x, y = y), alpha=0.6, color="blue", size=2)
+  print(g1)
+  
+  # 6) juntar tudo
+  blp_new <- rbind(blp_new, data.bla)
+  data_new <- rbind(data_new, data_subset)
+  rmse_df <- rbind(rmse_df, cbind(i, rmse_value))}
+```
 
 ___
 
 # **Step 3: Yield gap analysis**
 
+**Please adjust text** First reshape df to estimate y_pred_min and limiting factor
+
+```{r, warning=FALSE}
+# reshape df
+data_ygd <- dcast(data_new, year + Trial + Site + Farm.no. + Y ~ variable, value.var='y_pred') 
+data_ygd$y_pred_min = apply(data_ygd[6:9], 1, min) 
+data_ygd$factor_limitante = names(data_ygd[6:9])[apply(data_ygd[6:9], 1, which.min)]
+```
+
+Second estimate IYG and UYG
+
+```{r, warning=FALSE}
+# decompose yg
+data_ygd$IYG <- max(data_ygd$Y, na.rm=T) - data_ygd$y_pred_min
+data_ygd$UYG <- data_ygd$y_pred_min - data_ygd$Y
+```
+
+Third make some plots and interpret them
+
+```{r, warning=FALSE}
+# plot 1
+plot(data_ygd$y_pred_min, data_ygd$Y, xlim=c(0, 35), ylim=c(0, 35))
+abline(a=0, b=1)
+abline(a=0, b=0.5)
+
+# plot 2
+ggplot(data_ygd, aes(x=Y, y=data_ygd$y_pred_min, ymax = data_ygd$y_pred_min+IYG)) + 
+  geom_point(size=2.5, alpha=0.6, color="blue") +
+  geom_abline() +
+  geom_pointrange(aes(ymin = y_pred_min, ymax = y_pred_min+IYG), data = data_ygd, width = 0.2, size=0.1, linetype='dashed', col = 'red')+
+  geom_pointrange(aes(ymin = y_pred_min-UYG, ymax = y_pred_min), data = data_ygd, width = 0.2, size=0.1, linetype='dashed', col = 'green')+
+  # Coords and axis limits
+  geom_hline(yintercept=max(data_ygd$Y), size=1, linetype='dashed', col = 'red')+
+  geom_hline(yintercept=0, linetype='dotted', col = 'red')+
+  geom_vline(xintercept=0, linetype='dotted', col = 'red')+
+  coord_cartesian(xlim=c(0, max(data_ygd$Y)), ylim=c(0, max(data_ygd$Y))) + 
+  labs(title="Yield gap decomposition", subtitle="Following the method of Wairegi et al. (2010)", y="Predicted crop yield Y [t/ha]",
+       x="Observed crop yield X [t/ha]", caption="") + theme_bw() + theme(text = element_text(size=15))
+
+```
 
 ___
 
 # **Recommendations**
 
-    
+**Please summarize here what we learnt with this** Good for datasets with clear responses to x, not for datasets close to yield potential. Subjective selection of BL points. Different models possible to fit regressions etc....
 
 ___
 
