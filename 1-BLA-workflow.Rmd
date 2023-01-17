@@ -74,7 +74,7 @@ file <- 'https://raw.githubusercontent.com/jvasco323/EiA_YGD_workflow/main/data-
 data <- read.csv(url(file))
 
 # list variables of interest
-str(data)
+# str(data)
 ```
 
 ___
@@ -143,7 +143,69 @@ ___
 
 # **Step 1: Field selection**
 
+**Please describe the function below step by step** First paragraph, what it does generically. Second paragraph, two approaches implemented to identify ymax.  
 
+```{r, warning=FALSE}
+bl_points <- function(df, xvar, approach){
+  
+   # select the x variable of interest
+   df <- df[,c("yld_t0", xvar)]
+   
+   # modify column names for generic use 
+   colnames(df)[1] = "Y"
+   colnames(df)[2] = "X"
+   df <- subset(df, X>0, select=c(Y, X)) # why x > 0?
+   
+   # 'NULL' values are excluded to avoid data transformation problems and calculation failures 
+   # correct NA values for both Y and X variables 
+   df$Y[is.na(df$Y)] <- mean(df$Y, na.rm=T)
+   df$X[is.na(df$X)] <- mean(df$X, na.rm=T)
+   
+   # split X variable in 10 quantiles (Fermont et al., 2009)
+   x_0.1 <- subset(df, X <= quantile(X, 0.1))
+   x_0.2 <- subset(df, X > quantile(X, 0.1) & X <= quantile(X, 0.2))
+   x_0.3 <- subset(df, X > quantile(X, 0.2) & X <= quantile(X, 0.3))
+   x_0.4 <- subset(df, X > quantile(X, 0.3) & X <= quantile(X, 0.4))
+   x_0.5 <- subset(df, X > quantile(X, 0.4) & X <= quantile(X, 0.5))
+   x_0.6 <- subset(df, X > quantile(X, 0.5) & X <= quantile(X, 0.6))
+   x_0.7 <- subset(df, X > quantile(X, 0.6) & X <= quantile(X, 0.7))
+   x_0.8 <- subset(df, X > quantile(X, 0.7) & X <= quantile(X, 0.8))
+   x_0.9 <- subset(df, X > quantile(X, 0.8) & X <= quantile(X, 0.9))
+   x_1.0 <- subset(df, X > quantile(X, 0.9) & X <= quantile(X, 1.0))
+
+   # define boundary points for each quantile based on maximum value
+   if(approach == 'maximum'){
+    blp_0.0 <- subset(x_0.1, X == min(X)) #  briefly explain why needed
+    blp_0.1 <- subset(x_0.1, Y == max(Y))
+    blp_0.2 <- subset(x_0.2, Y == max(Y))
+    blp_0.3 <- subset(x_0.3, Y == max(Y))
+    blp_0.4 <- subset(x_0.4, Y == max(Y))
+    blp_0.5 <- subset(x_0.5, Y == max(Y))
+    blp_0.6 <- subset(x_0.6, Y == max(Y))
+    blp_0.7 <- subset(x_0.7, Y == max(Y))
+    blp_0.8 <- subset(x_0.8, Y == max(Y))
+    blp_0.9 <- subset(x_0.9, Y == max(Y))
+    blp_1.0 <- subset(x_1.0, Y == max(Y)) 
+
+   # define boundary points for each quantile based on yields in given quantile
+   } else if(approach == '95_quantile'){
+    blp_0.0 <- subset(x_0.1, X == min(X)) 
+    blp_0.1 <- subset(x_0.1, Y > quantile(Y, 0.95))
+    blp_0.2 <- subset(x_0.2, Y > quantile(Y, 0.95))
+    blp_0.3 <- subset(x_0.3, Y > quantile(Y, 0.95))
+    blp_0.4 <- subset(x_0.4, Y > quantile(Y, 0.95))
+    blp_0.5 <- subset(x_0.5, Y > quantile(Y, 0.95))
+    blp_0.6 <- subset(x_0.6, Y > quantile(Y, 0.95))
+    blp_0.7 <- subset(x_0.7, Y > quantile(Y, 0.95))
+    blp_0.8 <- subset(x_0.8, Y > quantile(Y, 0.95))
+    blp_0.9 <- subset(x_0.9, Y > quantile(Y, 0.95))
+    blp_1.0 <- subset(x_1.0, Y > quantile(Y, 0.95))}
+
+   # bind subsets
+   blp_df <- rbind(blp_0.0, blp_0.1, blp_0.2, blp_0.3, blp_0.4, blp_0.5, 
+                   blp_0.6, blp_0.7, blp_0.8, blp_0.9, blp_1.0)
+   return(blp_df)}
+```
 ___
 
 # **Step 2: Boundary lines**
