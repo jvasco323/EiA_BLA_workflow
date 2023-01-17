@@ -1,0 +1,172 @@
+---
+title: "Boundary lines for yield gap analysis, revisiting Fermont et al. (2009)"
+author:
+- Tomás Roquette Tenreiro$^a$ (PhD) and João Vasco Silva$^a$ (PhD)
+- $^a$SISTAGRO - Systems Engineering in Agriculture
+- $^b$CIMMYT-Zimbabwe & WUR-PPS
+date: "`r format(Sys.time(), '%d-%B-%Y')`"
+output:
+  html_document:
+    toc: yes
+    toc_depth: 2
+    toc_float:
+      collapsed: no
+      smooth_scroll: yes
+    fig_caption: yes
+    css: style.css
+    header-includes:
+    - \usepackage{setspace}
+    - \sinlgespacing
+  pdf_document:
+    toc: yes
+    toc_depth: '2'
+  word_document:
+    toc: yes
+    toc_depth: '2'
+bibliography: references.bib
+csl: https://raw.githubusercontent.com/citation-style-language/styles/master/ecology-letters.csl
+---
+
+```{r, echo=FALSE}
+knitr::opts_chunk$set(message = FALSE)
+```
+
+___
+
+# **Introduction**
+
+**PLEASE DEVELOP THIS TEXT**
+
+Explain yield gap analysis and how boundary lines fit into that
+
+Define the approach: 3 steps: 1) get BL points, 2) fit regressions and plot, 3) do the yield gap decomposition. For the latter please introduce the concepts of identified and unidentified yield gaps.
+
+Provide background in the study of Fermont et al. Cassava in Kenya and Uganda, data points, key results from the paper.
+
+___
+
+# **Load required R packages**
+
+First, we need to load the R packages needed to run this workflow.
+
+```{r, warning=FALSE}
+# package names
+packages <- c("frontier", "dplyr", "tidyr", "knitr", "car", "RColorBrewer", "DT")
+
+# install packages
+installed_packages <- packages %in% rownames(installed.packages())
+if (any(installed_packages == FALSE)){
+  install.packages(packages[!installed_packages])}
+
+# load packages
+invisible(lapply(packages, library, character.only = TRUE))
+```
+
+___
+
+# **Farmer field data**
+
+**ADJUST AS NEEDED** The first step is to load the farmer field data to be used for yield gap analysis. The data contain (a) primary data on self-reported Ya, management practices, and biophysical conditions at field level obtained through a household survey, and (b) secondary data obtained from spatial products using the GPS coordinates of the individual households. The household survey is a panel of households over two growing seasons (2009 and 2013). Type and sources of secondary data include: climate zones from the Global Yield Gap Atlas [@vanWart2013], soil water properties from AfSIS-GYGA [@Leenaars2018], agro-ecological zones for Ethiopia [@MoA1998], and farming systems classification for Africa [@Tilahun2017].   
+
+```{r}
+# read .csv file with data
+file <- 'https://raw.githubusercontent.com/jvasco323/EiA_YGD_workflow/main/data-wheat-ethiopia.csv'
+data <- read.csv(url(file))
+
+# list variables of interest
+str(data)
+```
+
+___
+
+# **Data manipulation**
+
+explain code below. Other things is to look at input variables, NA etc. Give advice.
+
+```{r}
+# remove outliers
+# data <- subset(raw_data, yld_t0 < 30)
+```
+
+___
+
+# **Descriptive statistics**
+
+**ADJUST TEXT TO THE PRINTED TABLE BELOW** Descriptive statistics of the actual yield and (continuous) crop management variables used in the analysis for the 2 years of the survey are provided below. Actual yield of wheat across Ethiopia was on average 1.76 t/ha in 2009 and 1.77 t/ha in 2013. N and P application rates were on average 48 kg N/ha and 20 kg P/ha, respectively. Plot sizes were on average 0.45 ha in 2009 and 0.40 ha in 2013.
+
+```{r, echo=FALSE, warning=FALSE}
+#vars3 <- c('year', 'handweeding_persdayha', 'herb_lha', 'pfert_kgha', 'nfert_kgha', 'seed_kgha', 'subplotsize_ha', 'yield_tha')
+# mean
+#numeric_cols_mean <- data[,vars3] %>%
+#  group_by(year) %>%
+#  summarise(across(
+#    .cols = where(is.numeric), 
+#    .fns = list(Mean = mean), na.rm = TRUE, 
+#    .names = "{col}"))
+#numeric_cols_mean <- round(numeric_cols_mean, 2)
+#numeric_cols_mean <- t(numeric_cols_mean)
+#colnames(numeric_cols_mean)[2] <- 'Mean 2013'
+#colnames(numeric_cols_mean)[1] <- 'Mean 2009'
+#numeric_cols_mean = numeric_cols_mean[-1,]
+#Variable <- rownames(numeric_cols_mean)
+#rownames(numeric_cols_mean) <- NULL
+#numeric_cols_mean <- cbind(Variable, numeric_cols_mean)
+# sd
+#numeric_cols_sd <- data[,vars3] %>%
+#  group_by(year) %>%
+#  summarise(across(
+#    .cols = where(is.numeric), 
+#    .fns = list(SD = sd), na.rm = TRUE, 
+#    .names = "{col}"))
+#numeric_cols_sd <- round(numeric_cols_sd, 2)
+#numeric_cols_sd <- t(numeric_cols_sd)
+#colnames(numeric_cols_sd)[2] <- 'StDev 2013'
+#colnames(numeric_cols_sd)[1] <- 'StDev 2009'
+#numeric_cols_sd = numeric_cols_sd[-1,]
+#Variable <- rownames(numeric_cols_sd)
+#rownames(numeric_cols_sd) <- NULL
+#numeric_cols_sd <- cbind(Variable, numeric_cols_sd)
+# merge
+#numeric_cols = merge(numeric_cols_mean, numeric_cols_sd, by='Variable')
+#numeric_cols$Variable[1] <- 'Hand-weeding (person-day/ha)'
+#numeric_cols$Variable[2] <- 'Herbicide use (L/ha)'
+#numeric_cols$Variable[3] <- 'N application rate (kg N/ha)'
+#numeric_cols$Variable[4] <- 'P application rate (kg P/ha)'
+#numeric_cols$Variable[5] <- 'Seed rate (kg/ha)'
+#numeric_cols$Variable[6] <- 'Plot size (ha)'
+#numeric_cols$Variable[7] <- 'Actual wheat yield (t/ha)'
+# show
+#knitr::kable(numeric_cols)
+```
+
+___
+
+# **Step 1: Field selection**
+
+
+___
+
+# **Step 2: Boundary lines**
+
+
+___
+
+# **Step 3: Yield gap analysis**
+
+
+___
+
+# **Recommendations**
+
+    
+
+___
+
+# **Acknowledgments**
+
+We thank Ken Giller (WUR-PPS) and Piet van Asten (Olam International) for sharing the original data showcased in this workflow. The development of this notebook was possible thanks to the financial support from the OneCGIAR initiative on *Excellence in Agronomy*. For further support and questions on how to implement this workflow to other data sets, or further thoughts on how to improve the theoretical framework used, are almost welcome and should be addressed to **j.silva@cgiar.org**.   
+
+___
+
+# **References**
+
