@@ -35,13 +35,39 @@ ___
 
 # **Introduction**
 
-**PLEASE DEVELOP THIS TEXT**
+**Please review my text carefully and modify whatever you consider necessary**
 
-Explain yield gap analysis and how boundary lines fit into that
-
-Define the approach: 3 steps: 1) get BL points, 2) fit regressions and plot, 3) do the yield gap decomposition. For the latter please introduce the concepts of identified and unidentified yield gaps.
 
 Provide background in the study of Fermont et al. Cassava in Kenya and Uganda, data points, key results from the paper.
+
+Sustaining food production in the years ahead will require productivity gains in resource use. Specific challenges include estimating the magnitude and thus the value of yield gaps, identifying limiting factors, and implementing profitable and sustainable  strategies. Closing yield gaps in arable farming, while improving resource use  efficiency, is also expected to minimize the expansion of arable land and emissions while reducing other undesirable externalities. 
+
+Over the last years, new methodological approaches have been evolving within the context of yield gap assessment, mostly due to advances in data engineering and programming languages. One clear example is the mathematical computation of boundary-lines over crop yield datasets to decompose yield gaps (INCLUDE SOME REFERENCES, e.g., Silva et al.). The boundary-line analysis (BLA), based on the Law of the Minimum, is a powerful concept in agronomy which can be used for quantitative decomposition of yield gaps. The BLA is considered a useful complement to more traditional data analysis techniques. From a conceptual point of view, different approaches to fit boundary lines on crop data have been proposed throughout the last century. Five different methodological families can be identified:
+
+1.	Curves fitted “manually and by eye” (BYE);
+2.	The use of crop simulation modelling for benchmarking potential yields;
+3.	Empirically based methods: grouping data and use ‘splines’;
+4.	Econometrics based on the use of quantile regression analysis (QREG);
+5.	Stochastic frontier analysis (SFA);
+
+Herewith, we focused on the ‘groups and splines’ methodological family due to the following reasons:  
+
+•	High popularity in literature (e.g., Casanova et al.);
+•	Purely statistical and comprehensible approach (Fermont et al.) of plausible implementation with a R-notebook structure.
+•	Not based on ’machine learning’ methods neither crop simulation modelling which would require more complex computation.
+•	Easier adoption and implementation by agronomists and scientists working on crop production or research. 
+
+The ‘group and spline’ BLA method is defined by the following general features:
+
+•	To identify the boundary points;
+•	To fit a continuous function at these points;
+•	To estimate the yield gap for each production factor;
+•	To identify the most limiting factor, by analogy with von Liebig’s law of the minimum, and decompose the yield gap for each field;
+
+The yield gap decomposition can be implemented according to the method described by Wairegi et al. (2010). This method assumes responses according to von Liebig’s law of the minimum, and identifies the minimum predicted yield (Ymin) for each field as Ymin= Min(Yx1,Yx2,...,Yxn), where Yx is the corresponding BLA predicted yield for a given X-variable. The identified yield gap (IYG) is defined as the difference between the maximum attainable yield and the Ymin. The unexplained yield gap is defined as the difference between Ymin and observed yield. The BLA serves to rank yield-constraints and to deliver a quantitative estimation of the technical issues causing yield gaps. In locations where biotic constraints are particularly important, the BLA seems to predict yields less accurately due to the higher interactions between constraints. Therefore, only the IYG can be associated with the variation of the corresponding independent variable X, which is determined by the lowest BLA predicted yield as defined by the law of the minimum. 
+
+
+
 
 ___
 
@@ -332,7 +358,23 @@ ___
 
 # **Recommendations**
 
-**Please summarize here what we learnt with this** Good for datasets with clear responses to x, not for datasets close to yield potential. Subjective selection of BL points. Different models possible to fit regressions etc....
+The main advantages of BLA are the following:
+
+•	Empirically based and comprehensible.
+•	Lighter computation requirements.
+•	Open-source code can be used for implementation (e.g., R-script).
+•	Solid web supply of information regarding code functions and libraries to be used.
+•	A minimum of two variables are needed (i.e., yield is mandatory plus an additional explaining variable).
+
+The main disadvantages of BLA are the following:
+
+•	It requires a relatively large dataset.
+•	The independent variable must cover a wide range of variation, with multiple combinations of Y vs. independent variable within each group of X-variable. 
+•	It requires solid control of outliers, mostly on the Y-axis. The error of measured yields must be minimal. 
+•	The interpretability of the data can not be purely statistical as the patterns of the splines need to be contextualized through agronomic knowledge. 
+•	Reclassification or segmentation of data according to technological characteristics of the production system (e.g., irrigated vs. rainfed) must be conducted. This implies that even larger datasets are needed when dealing with heterogeneous data in terms of geographic locations, climatic variation, cultivars, or agronomy. 
+•	Our experience indicates that dataset size must be comprehended between hundreds of observations, when dealing with homogeneous data in terms of agronomy and climate, but this threshold can increase easily to more than a few thousand of observations when climate and agronomy vary. 
+
 
 ___
 
@@ -343,4 +385,12 @@ We thank Ken Giller (WUR-PPS) and Piet van Asten (Olam International) for sharin
 ___
 
 # **References**
+
+Casanova, D., Goudriaan, J., Bouma, J., Epema, G.F., 1999. Yield gap analysis in relation to soil properties in direct-seeded flooded rice. Geoderma 91, 191–216.
+
+Casanova, D., Goudriaan, J., Forner, M.M.C., Withagen, J.C.M., 2002. Rice yield prediction from yield components and limiting factors. Eur. J. Agron. 17, 41–61.
+
+Fermont, A.M., van Asten, P.J.A., Tittonell, P., van Wijk, M.T., Giller, K.E., 2009. Closing the cassava yield gap: An analysis from smallholder farms in East Africa. Field Crops Res. 112, 24–36.
+
+Wairegi, L.W.I., van Asten, P.J.A., Tenywa, M.M., Bekunda, M.A., 2010. Abiotic constraints override biotic constraints in East African highland banana systems. Field Crops Res. 117, 146–153.
 
