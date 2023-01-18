@@ -90,7 +90,7 @@ ___
 
 # **Crop field data**
 
-The first step is to load the crop data to be used for yield gap analysis. The dataset contains reported observed yields, management practices, and biophysical conditions at field level (Fermont et al., 2009). The farm surveys and agronomic trials were carried out in arange of sites in western Kenya and central and eastern Uganda. The sites were chosen to represent a range of environments andmanagement practices in cassava-based cropping systems. In total, 13 different yield-explaining variables (x-variables) were collected for a total number of 122 fields. The collected x-variables are the following: 
+The first step is to load the crop data to be used for yield gap analysis. The dataset contains reported observed yields, management practices, and biophysical conditions at field level (Fermont et al., 2009). The farm surveys and agronomic trials were carried out in arange of sites in western Kenya and central and eastern Uganda. The sites were chosen to represent a range of environments andmanagement practices in cassava-based cropping systems. In total, 13 different yield-explaining variables (x-variables) were collected for a total number of 122 fields. The following x-variables are used: 
 
 1. "pH_soil"
 2. "SOC"
@@ -129,7 +129,7 @@ ___
 
 # **Descriptive statistics**
 
-Descriptive statistics of the actual yield and (continuous) crop management variables used in the analysis for the 2 years of the survey are provided below. Actual yield of wheat across Ethiopia was on average 1.76 t/ha in 2009 and 1.77 t/ha in 2013. N and P application rates were on average 48 kg N/ha and 20 kg P/ha, respectively. Plot sizes were on average 0.45 ha in 2009 and 0.40 ha in 2013.
+Descriptive statistics of the actual yield and crop management variables used in the analysis for the 2 years of the analysis are provided below. Actual yield of Cassava across the study region was on average 13.9 t/ha. Local soils are relatively acidified (average pH < 5.8) and season rainfall was on average 1728 mm. Soil clay content and soil organic C were on average 27.2% and 10.5 mg/kg, respectively.  
 
 ```{r, echo=FALSE, warning=FALSE}
 vars3 <- c('year', 'RF_tot', 'clay', 'pH_soil', 'SOC', 'days_to_harvest', 'yld_t0')
@@ -178,8 +178,6 @@ knitr::kable(numeric_cols)
 ___
 
 # **Step 1: Field selection**
-
-**Please describe the function below step by step** 
 
 This function categorizes the X-variable in 10 groups and it fits a non-linear reg. through these selected Xi and Y values (i.e., spline model). We fit a boundary line according to Fermont et al. (2009), which belongs to the methodological family of 'group + splines regressions'. This is mostly based on the use of 'Log functions' as originally proposed by Webb. (1972), Casanova et al. (1999) and Shatar & Mcbratney. (2004).
 
@@ -250,9 +248,7 @@ ___
 
 # **Step 2: Boundary lines**
 
-**Please describe the function below step by step** 
-
-First we select the variables for which BL will be fitted. 
+First, we select the variables for which BL will be fitted. 
 
 We should avoid using too many X variables or variables with discrete distributions of X values. The variables 'CAD_T0_9', 'RF_tot', 'RF0_6M', 'RF_.d' and 'days_to_harvest' in Fermont et al. (2009) do not show a continuous distribution of values as these are distributed over a limitted group of X-classes. This is problematic for BLA because many observation points would be associated with the same y_predicted. The most evident case is 'CAD_T0_9' because almost all points are equal to zero, which results in an excessive concentration of points around the same Y_predicted (X=0). Therefore, we decided to remove all these variables from the yield decomposition analysis.
 
@@ -271,7 +267,7 @@ For the selection of variables, we recommend the following two 'rules of thumb':
 variaveis <- c("pH_soil", "totN_soil", "P_soil", "clay")
 ```
 
-Second we create empty dataframes to store data (be specific which data etc)
+Second, we create empty dataframes to bind all the new data generated in the loop below. 
 
 ```{r, warning=FALSE}
 blp_new <- c()
@@ -279,7 +275,11 @@ data_new <- c()
 rmse_df <- c()
 ```
 
-Explain all steps in the loop below. 1st why we loop. And from there explain each of the six steps. [[I NEED TO FIND A WAY TO PLOT THE FIGURES TOGETHER, OUT OF THE LOOP]]
+The following loop is divided into six subsequent steps. The loop is used to create a new column (i) in the corresponding dataframes for each x-variable (i) that is selected (STEP 1). The new column (i) stores the corresponding BL points selected through the approach "maximum" (STEP 2). For each cluster of BL points, the predictive model is created (STEP 3). Then, the predictive model is used to estimate to y_max in two different data frames (STEP3): one data frame includes only the BL points ("data.bla") and the other includes all the observation points ("data_subset"). After adding a new column (y_pred) to each dataframe, the root mean square error ("rmse") is computed on the small dataframe, wich is used to compare the maximum observed yields against the maximum predicted yields by the BL (STEP 5). Finally, all complete dataframes (each "data_subset" for each i-variable) are binded together (STEP 6). Three final tables are produced: 
+
+1. "blp_new": only the BL points (one column with the observed yields plus n columns, each showing the predicted y_max for each i variable).
+2. "data_new": all points (one column with the observed yields plus n columns, each showing the predicted y_max for each i variable).
+3. "rmse_df": all the rmse (one column associated with each BL for each i-variable).
 
 ```{r, warning=FALSE}
 for(i in unique(variaveis)){
@@ -338,7 +338,7 @@ ___
 
 # **Step 3: Yield gap analysis**
 
-**Please adjust text** First reshape df to estimate y_pred_min and limiting factor
+First, the data frame is reshaped to estimate the y_pred_min and the corresponding limiting factor (i.e., the corresponding x-variable with the lowest BL predicted yield for a certain observed yield).
 
 ```{r, warning=FALSE}
 # reshape df
@@ -347,7 +347,7 @@ data_ygd$y_pred_min = apply(data_ygd[6:9], 1, min)
 data_ygd$factor_limitante = names(data_ygd[6:9])[apply(data_ygd[6:9], 1, which.min)]
 ```
 
-Second estimate IYG and UYG
+Second, we estimate the 'identified' yield gap (IYG) and the 'unidentified' yield gap (UYG) according to Wairegi et al. (2010). 
 
 ```{r, warning=FALSE}
 # decompose yg
@@ -355,7 +355,11 @@ data_ygd$IYG <- max(data_ygd$Y, na.rm=T) - data_ygd$y_pred_min
 data_ygd$UYG <- data_ygd$y_pred_min - data_ygd$Y
 ```
 
-Third make some plots and interpret them
+Third, we plot the yield gap decomposition figure and the graphic is interpreted.
+
+The first plot shows predicted versus observed cassava yields for the 2004 and 2005 trials. Predictions are made using the minimum yield predicted by all the boundary lines considered. Diagonal solid lines represent the 1:1 and 2:1 lines, which indicates yield gap zones (i.e., zero to 100% gap and 100% to 200% gap). Points above the 1:1 line correspond to observed yields greater than the corresponding predictions. Those are points to which the useability of this apporach fails. Thos points indicate the general trend of BL underpredicting the maximum yield for about 20% of the observations.
+
+The second plot shows observed and predicted Cassava yields from the BLA. The predicted yield was the minimum prediction based on biophysical factors. Green and red vertical segments indicate the magnitude of the UYG and the IYG, respectively. The larger is the relative distance of the red line in comparison to the green one, the greater will be the fraction of total yield gap that is actually explained by the considered x-variables. Dots below the line 1:1, correpond to the same points shown above the same line in the previous plot. 
 
 ```{r, warning=FALSE}
 # plot 1
@@ -392,14 +396,17 @@ The main advantages of BLA are the following:
 •	Open-source code can be used for implementation (e.g., R-script).
 •	Solid web supply of information regarding code functions and libraries to be used.
 •	A minimum of two variables are needed (i.e., yield is mandatory plus an additional explaining variable).
+•	It does not necessarily require a huge dataset if edaphoclimatic and technological conditions are properly segmented. 
+
 
 The main disadvantages of BLA are the following:
 
-•	It requires a relatively large dataset.
+•	It still requires a relatively large dataset (at least N > 100).
 •	The independent variable must cover a wide range of variation, with multiple combinations of Y vs. independent variable within each group of X-variable. 
-•	It requires solid control of outliers, mostly on the Y-axis. The error of measured yields must be minimal. 
-•	The interpretability of the data can not be purely statistical as the patterns of the splines need to be contextualized through agronomic knowledge. 
-•	Reclassification or segmentation of data according to technological characteristics of the production system (e.g., irrigated vs. rainfed) must be conducted. This implies that even larger datasets are needed when dealing with heterogeneous data in terms of geographic locations, climatic variation, cultivars, or agronomy. 
+•	It requires solid control of outliers, mostly on the Y-axis. The error of measured yields must be minimal. Otherwise, the "maximum" approach must be substituted by the "highest_quantile" one, and our experience indicates that this tends to result in a underestimation of the predicted y_max. 
+•	The interpretability of the data cannot be purely statistical as the patterns of the 'splines' need to be contextualized through agronomic knowledge. 
+•	X-variables with discrete distributions (or X-zero values) must be kept out of this kind of analysis. These may still be used for segmentation of data but its applicability depends largely on the total amount of data and the size of each generated subset of data.
+•	Reclassification or segmentation of data according to technological characteristics of the production system (e.g., irrigated vs. rainfed) must be conducted. This implies that even larger datasets are needed when dealing with heterogeneous data in terms of geographic locations, climatic variation, cultivars, or agronomy. Theoretically, this rule would apply to all x-variables which are not entirely independent. However, one majour point of concern is the enormous difficulty that is to identify which variables play an absolutely independent role in crops performance. This is far from being an easy task and that is why we highlight the importance of mechanistic knowledge on crop science to guide the use of this method and the interpretability of results.  
 •	Our experience indicates that dataset size must be comprehended between hundreds of observations, when dealing with homogeneous data in terms of agronomy and climate, but this threshold can increase easily to more than a few thousand of observations when climate and agronomy vary. 
 
 
