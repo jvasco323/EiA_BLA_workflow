@@ -88,16 +88,29 @@ invisible(lapply(packages, library, character.only = TRUE))
 
 ___
 
-# **Farmer field data**
+# **Crop field data**
 
-**ADJUST AS NEEDED** The first step is to load the farmer field data to be used for yield gap analysis. The data contain (a) primary data on self-reported Ya, management practices, and biophysical conditions at field level obtained through a household survey, and (b) secondary data obtained from spatial products using the GPS coordinates of the individual households. The household survey is a panel of households over two growing seasons (2009 and 2013). Type and sources of secondary data include: climate zones from the Global Yield Gap Atlas [@vanWart2013], soil water properties from AfSIS-GYGA [@Leenaars2018], agro-ecological zones for Ethiopia [@MoA1998], and farming systems classification for Africa [@Tilahun2017].   
+The first step is to load the crop data to be used for yield gap analysis. The dataset contains reported observed yields, management practices, and biophysical conditions at field level (Fermont et al., 2009). The farm surveys and agronomic trials were carried out in arange of sites in western Kenya and central and eastern Uganda. The sites were chosen to represent a range of environments andmanagement practices in cassava-based cropping systems. In total, 13 different yield-explaining variables (x-variables) were collected for a total number of 122 fields. The collected x-variables are the following: 
+
+1. "pH_soil"
+2. "SOC"
+3. "totN_soil"
+5. "P_soil"
+6. "K_soil"
+7. "CBB_T0_9"
+8. "CGM_T0_9"
+9. "RF_tot"
+10. "RF0_6M"
+11. "RF_.d"
+12. "clay"
+13. "days_to_harvest"
 
 ```{r}
 # read .csv file with data
 file <- 'https://raw.githubusercontent.com/jvasco323/EiA_BLA_workflow/main/fermont_etal_final.csv'
 data <- read.csv(url(file))
 
-# list variables of interest
+# list variables of interest for visualization 
 str(data)
 ```
 
@@ -105,7 +118,7 @@ ___
 
 # **Data manipulation**
 
-explain code below. Other things is to look at input variables, NA etc. Give advice.
+Here we subset all numeric independent variables by considering all points with yield values above '30 ton/ha' as outliers.
 
 ```{r}
 # remove outliers
@@ -116,7 +129,7 @@ ___
 
 # **Descriptive statistics**
 
-**ADJUST TEXT TO THE PRINTED TABLE BELOW** Descriptive statistics of the actual yield and (continuous) crop management variables used in the analysis for the 2 years of the survey are provided below. Actual yield of wheat across Ethiopia was on average 1.76 t/ha in 2009 and 1.77 t/ha in 2013. N and P application rates were on average 48 kg N/ha and 20 kg P/ha, respectively. Plot sizes were on average 0.45 ha in 2009 and 0.40 ha in 2013.
+Descriptive statistics of the actual yield and (continuous) crop management variables used in the analysis for the 2 years of the survey are provided below. Actual yield of wheat across Ethiopia was on average 1.76 t/ha in 2009 and 1.77 t/ha in 2013. N and P application rates were on average 48 kg N/ha and 20 kg P/ha, respectively. Plot sizes were on average 0.45 ha in 2009 and 0.40 ha in 2013.
 
 ```{r, echo=FALSE, warning=FALSE}
 vars3 <- c('year', 'RF_tot', 'clay', 'pH_soil', 'SOC', 'days_to_harvest', 'yld_t0')
@@ -166,7 +179,11 @@ ___
 
 # **Step 1: Field selection**
 
-**Please describe the function below step by step** First paragraph, what it does generically. Second paragraph, two approaches implemented to identify ymax.  
+**Please describe the function below step by step** 
+
+This function categorizes the X-variable in 10 groups and it fits a non-linear reg. through these selected Xi and Y values (i.e., spline model). We fit a boundary line according to Fermont et al. (2009), which belongs to the methodological family of 'group + splines regressions'. This is mostly based on the use of 'Log functions' as originally proposed by Webb. (1972), Casanova et al. (1999) and Shatar & Mcbratney. (2004).
+
+Two different approaches to identify the ymax are available in the following code chunk: 1) ymax defined by the absolute maximum and 2) ymax defined by the mean of the highest quantile. The selection of the most appropriate option depends on the vertical scatter at the highest yield levels and whether the obtained BL error is acceptable or not. In our perspective, the selection of ymax based on the absolute maximum is more appropriate for denser scatters, where the maximum values approximate the main cloud of observations. The second option, which uses the highest quantile, can be a more conservative option for most of cases, and a better alternative for situations when a large dispersion of individual maximum yields takes place. For those cases, the mean of the highest quantile will reduce the individual weigth of single points, which could be overestimated. It is important to note that BLA based on splines tends to underestimate ymax for most initial x-intervals (i.e., where y responds largely to a variation of x). In this sense, the use of the mean of highest quantile should be avoided everytime there is enough confidence on the reported y values.  
 
 ```{r, warning=FALSE}
 bl_points <- function(df, xvar, approach){
@@ -268,17 +285,17 @@ Explain all steps in the loop below. 1st why we loop. And from there explain eac
 for(i in unique(variaveis)){
   # print(i)
   
-  # 1) selecionar data
+  # 1) select data
   data_subset <- data[,c("year", "Trial", "Site", "Farm.no.", "yld_t0", i)]
   colnames(data_subset)[5] = "Y"
   colnames(data_subset)[6] = "X"
   data_subset$variable <- i
   
-  # 2) estimar pontos de fronteira
+  # 2) estimate BL points
   data.bla <- bl_points(data, i, approach="maximum")
   data.bla$variable <- i
   
-  # 3) estimar regressao
+  # 3) create the predictive model
   model <- glm(Y ~ ns(X, df = 2), data = data.bla)
   # print(model)
   
@@ -291,8 +308,7 @@ for(i in unique(variaveis)){
   # 5) ERROR assessment
   rmse_value <- rmse(data.bla$Y, data.bla$y_pred)
   
-  # for plotting
-  # (para melhorar, meter plots fora do loop)
+  # For plotting the BLA outcomes
   plot_lims <- range(data_subset$X, na.rm=T)
   plot.grid <- seq(from=plot_lims[1], to=plot_lims[2])
   pred <- predict(model, newdata=list(X=plot.grid), se=T)
@@ -312,7 +328,7 @@ for(i in unique(variaveis)){
     geom_line(data = spline.d, aes(x = x, y = y), alpha=0.6, color="blue", size=2)
   print(g1)
   
-  # 6) juntar tudo
+  # 6) bind all data together 
   blp_new <- rbind(blp_new, data.bla)
   data_new <- rbind(data_new, data_subset)
   rmse_df <- rbind(rmse_df, cbind(i, rmse_value))}
@@ -411,7 +427,11 @@ Passioura, J.B., Angus, J.F., 2010. Chapter 2 - Improving Productivity of Crops 
 
 Silva, J.V., Reidsma, P., Laborte, A.G., van Ittersum, M.K., 2017. Explaining rice yields and yield gaps in Central Luzon, Philippines: An application of stochastic frontier analysis and crop modelling. Eur. J. Agron. 82, 223–241.
 
+Shatar, T.M., Mcbratney, A.B., 2004. Boundary-line analysis of field-scale yield response to soil properties. J. Agric. Sci. 142, 553–560.
+
 Wairegi, L.W.I., van Asten, P.J.A., Tenywa, M.M., Bekunda, M.A., 2010. Abiotic constraints override biotic constraints in East African highland banana systems. Field Crops Res. 117, 146–153.
+
+Webb, R.A., 1972. Use of the Boundary Line in the analysis of biological data. J. Hortic. Sci. 47, 309–319.  
 
 
 
