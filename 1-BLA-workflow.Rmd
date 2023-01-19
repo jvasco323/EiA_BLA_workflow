@@ -61,11 +61,11 @@ The ‘group and spline’ BLA method is defined by the following general featur
 •	To estimate the yield gap for each production factor;
 •	To identify the most limiting factor, by analogy with von Liebig’s law of the minimum, and decompose the yield gap for each field;
 
-The yield gap decomposition can be implemented according to the method described by Wairegi et al. (2010). This method assumes responses according to von Liebig’s law of the minimum, and identifies the minimum predicted yield (Ymin) for each field as Ymin= Min(Yx1,Yx2,...,Yxn), where Yx is the corresponding BLA predicted yield for a given X-variable. The identified yield gap (IYG) is defined as the difference between the maximum attainable yield and the Ymin. The unexplained yield gap is defined as the difference between Ymin and observed yield. The BLA serves to rank yield-constraints and to deliver a quantitative estimation of the technical issues causing yield gaps. In locations where biotic constraints are particularly important, the BLA seems to predict yields less accurately due to the higher interactions between constraints. Therefore, only the IYG can be associated with the variation of the corresponding independent variable X, which is determined by the lowest BLA predicted yield as defined by the law of the minimum. 
+The yield gap decomposition can be implemented according to the method described by Wairegi et al. (2010). This method assumes responses according to von Liebig’s law of the minimum, and identifies the minimum predicted yield (Ymin) for each field as Ymin= Min(Yx1,Yx2,...,Yxn), where Yx is the corresponding BLA predicted yield for a given X-variable. The identified yield gap (IYG) is defined as the difference between the maximum attainable yield and the Ymin. The unexplained yield gap (UYG) is defined as the difference between Ymin and observed yield. The BLA serves to rank yield-constraints and to deliver a quantitative estimation of the technical issues causing yield gaps. In locations where biotic constraints are particularly important, the BLA seems to predict yields less accurately due to the higher interactions between constraints. Therefore, only the IYG can be associated with the variation of the corresponding independent variable X, which is determined by the lowest BLA-predicted yield as defined by the law of the minimum. 
 
-This approach has been successfully used for yield gap assessment in cereal-based systems (e.g.Casanova et al., 1999; Shatar and McBratney,2004), but also for other crops such as Cassava (Fermont et al., 2009). Cassava yields in Africa are small and it remains unclear which factors most limit yields. Using a series of farm surveys and trials in Uganda and western Kenya, Fermont el al. (2009) evaluated the importance of abiotic, biotic and associated crop management constraints for cassava production. Fermont et al. (2009) started by sorting the independent variables and removing outliers. Then, BLA was used that represent the maximum yield response (the dependent variable) to the various independent variables considered. Average cassava yields in Kenya and Uganda ranged from 6.1 to 11.7 t/ha. Clear boundary lines were identified in the scatter plots relating soil fertility, soil texture, pest and disease, weed management and selected rainfall variables to cassava yield. 
+This approach has been successfully used for yield gap assessment in cereal-based systems (e.g.Casanova et al., 1999; Shatar and McBratney,2004), but also for other crops such as Cassava (Fermont et al., 2009). Cassava yields in Africa are small and it remains unclear which factors most limit yields. Using a series of farm surveys and trials in Uganda and western Kenya, Fermont el al. (2009) evaluated the importance of abiotic, biotic and associated crop management constraints for cassava production. Fermont et al. (2009) started by sorting the independent variables and removing outliers. Then, BLA was used that represent the maximum yield response (the dependent variable) to the various independent variables considered. 
 
-Here, we aim to replicate the concept of analysis conducted by Fermont et al. (2009) on the same original dataset by developing an automated analytical algorithm in R computing language.  
+Here, we aim to replicate the concept of analysis conducted by Fermont et al. (2009) on the same original dataset by developing an automated analytical algorithm in R computing language. Clear boundary lines were identified in the scatter plots relating soil fertility, soil texture, pest and disease, weed management and selected rainfall variables to cassava yield. 
 
 ___
 
@@ -85,12 +85,13 @@ if (any(installed_packages == FALSE)){
 # load packages
 invisible(lapply(packages, library, character.only = TRUE))
 ```
-
 ___
 
 # **Crop field data**
 
-The first step is to load the crop data to be used for yield gap analysis. The dataset contains reported observed yields, management practices, and biophysical conditions at field level (Fermont et al., 2009). The farm surveys and agronomic trials were carried out in arange of sites in western Kenya and central and eastern Uganda. The sites were chosen to represent a range of environments andmanagement practices in cassava-based cropping systems. In total, 13 different yield-explaining variables (x-variables) were collected for a total number of 122 fields. The following x-variables are used: 
+The first step is to load the crop data to be used for yield gap analysis. The dataset contains reported observed yields, management practices, and biophysical conditions at field level (Fermont et al., 2009). 
+
+The farm surveys and agronomic trials were carried out in arange of sites in western Kenya and central and eastern Uganda. The sites were chosen to represent a range of environments andmanagement practices in cassava-based cropping systems. In total, 13 different yield-explaining variables (x-variables) were collected for a total number of 122 fields. The following x-variables are used: 
 
 1. "pH_soil"
 2. "SOC"
@@ -181,7 +182,12 @@ ___
 
 This function categorizes the X-variable in 10 groups and it fits a non-linear reg. through these selected Xi and Y values (i.e., spline model). We fit a boundary line according to Fermont et al. (2009), which belongs to the methodological family of 'group + splines regressions'. This is mostly based on the use of 'Log functions' as originally proposed by Webb. (1972), Casanova et al. (1999) and Shatar & Mcbratney. (2004).
 
-Two different approaches to identify the ymax are available in the following code chunk: 1) ymax defined by the absolute maximum and 2) ymax defined by the mean of the highest quantile. The selection of the most appropriate option depends on the vertical scatter at the highest yield levels and whether the obtained BL error is acceptable or not. In our perspective, the selection of ymax based on the absolute maximum is more appropriate for denser scatters, where the maximum values approximate the main cloud of observations. The second option, which uses the highest quantile, can be a more conservative option for most of cases, and a better alternative for situations when a large dispersion of individual maximum yields takes place. For those cases, the mean of the highest quantile will reduce the individual weigth of single points, which could be overestimated. It is important to note that BLA based on splines tends to underestimate ymax for most initial x-intervals (i.e., where y responds largely to a variation of x). In this sense, the use of the mean of highest quantile should be avoided everytime there is enough confidence on the reported y values.  
+Two different approaches to identify the ymax are available in the following code chunk: 
+
+1) ymax defined by the absolute maximum.
+2) ymax defined by the mean of the highest quantile. 
+
+The selection of the most appropriate option depends on the vertical scatter at the highest yield levels and whether the obtained BL error is acceptable or not. In our perspective, the selection of ymax based on the absolute maximum is more appropriate for denser scatters, where the maximum values approximate the main cloud of observations. The second option, which uses the highest quantile, can be a more conservative option, and a better alternative for situations when a large dispersion of individual maximum yields takes place. For those cases, the mean of the highest quantile will reduce the individual weigth of single points, which could be overestimated. It is important to note that BLA based on splines tends to underestimate ymax for most initial x-intervals (i.e., where 'y' responds largely to a variation of 'x'). In this sense, the use of the mean of the highest quantile should be avoided everytime there is enough confidence on the reported y values.  
 
 ```{r, warning=FALSE}
 bl_points <- function(df, xvar, approach){
@@ -250,7 +256,7 @@ ___
 
 First, we select the variables for which BL will be fitted. 
 
-We should avoid using too many X variables or variables with discrete distributions of X values. The variables 'CAD_T0_9', 'RF_tot', 'RF0_6M', 'RF_.d' and 'days_to_harvest' in Fermont et al. (2009) do not show a continuous distribution of values as these are distributed over a limitted group of X-classes. This is problematic for BLA because many observation points would be associated with the same y_predicted. The most evident case is 'CAD_T0_9' because almost all points are equal to zero, which results in an excessive concentration of points around the same Y_predicted (X=0). Therefore, we decided to remove all these variables from the yield decomposition analysis.
+We should avoid using variables following a discrete distributions of 'x' values. The variables 'CAD_T0_9', 'RF_tot', 'RF0_6M', 'RF_.d' and 'days_to_harvest' in Fermont et al. (2009) do not show a continuous distribution of values as these are distributed over a limitted group of X-classes. This is problematic for BLA because many observation points would be associated with the same y_predicted. The most clear case is 'CAD_T0_9' where almost all points are equal to zero. This results in an excessive concentration of points around the same y_predicted (x=0). Therefore, we decided to remove all these variables from the yield decomposition analysis.
 
 For the selection of variables, we recommend the following two 'rules of thumb': 
 
@@ -275,7 +281,7 @@ data_new <- c()
 rmse_df <- c()
 ```
 
-The following loop is divided into six subsequent steps. The loop is used to create a new column (i) in the corresponding dataframes for each x-variable (i) that is selected (STEP 1). The new column (i) stores the corresponding BL points selected through the approach "maximum" (STEP 2). For each cluster of BL points, the predictive model is created (STEP 3). Then, the predictive model is used to estimate to y_max in two different data frames (STEP3): one data frame includes only the BL points ("data.bla") and the other includes all the observation points ("data_subset"). After adding a new column (y_pred) to each dataframe, the root mean square error ("rmse") is computed on the small dataframe, wich is used to compare the maximum observed yields against the maximum predicted yields by the BL (STEP 5). Finally, all complete dataframes (each "data_subset" for each i-variable) are binded together (STEP 6). Three final tables are produced: 
+The following loop is divided into six subsequent steps. The loop is used to create a new column (i) in the corresponding dataframes for each x-variable (i) that is selected (STEP 1). The new column (i) stores the corresponding BL points selected through the approach "maximum" (STEP 2). For each cluster of BL points, the predictive model is created (STEP 3). Then, the predictive model is used to estimate to y_max in two different data frames (STEP 4): one data frame includes only the BL points ("data.bla") and the other includes all the observation points ("data_subset"). After adding a new column (y_pred) to each dataframe, the root mean square error ("rmse") is computed on the small dataframe, wich is used to compare the maximum observed yields against the maximum predicted yields by the BL (STEP 5). Finally, all complete dataframes (each "data_subset" for each i-variable) are binded together (STEP 6). Three final tables are produced: 
 
 1. "blp_new": only the BL points (one column with the observed yields plus n columns, each showing the predicted y_max for each i variable).
 2. "data_new": all points (one column with the observed yields plus n columns, each showing the predicted y_max for each i variable).
@@ -347,7 +353,7 @@ data_ygd$y_pred_min = apply(data_ygd[6:9], 1, min)
 data_ygd$factor_limitante = names(data_ygd[6:9])[apply(data_ygd[6:9], 1, which.min)]
 ```
 
-Second, we estimate the 'identified' yield gap (IYG) and the 'unidentified' yield gap (UYG) according to Wairegi et al. (2010). 
+Second, we estimate the 'identified' yield gap (IYG) and the 'unexplained' yield gap (UYG) according to Wairegi et al. (2010). 
 
 ```{r, warning=FALSE}
 # decompose yg
@@ -357,7 +363,7 @@ data_ygd$UYG <- data_ygd$y_pred_min - data_ygd$Y
 
 Third, we plot the yield gap decomposition figure and the graphic is interpreted.
 
-The first plot shows predicted versus observed cassava yields for the 2004 and 2005 trials. Predictions are made using the minimum yield predicted by all the boundary lines considered. Diagonal solid lines represent the 1:1 and 2:1 lines, which indicates yield gap zones (i.e., zero to 100% gap and 100% to 200% gap). Points above the 1:1 line correspond to observed yields greater than the corresponding predictions. Those are points to which the useability of this apporach fails. Thos points indicate the general trend of BL underpredicting the maximum yield for about 20% of the observations.
+The first plot shows predicted versus observed cassava yields for the 2004 and 2005 trials. Predictions correspond to the minimum yield predicted by all the boundary lines considered. Diagonal solid lines represent the 1:1 and 2:1 lines, which indicates yield gap zones (i.e., zero to 100% gap and 100% to 200% gap). Points above the 1:1 line correspond to observed yields greater than the corresponding predictions. Those are points to which the useability of this approach fails. Those points indicate the general trend of BL for underpredicting the maximum yield on about 1/5 of the observations.
 
 The second plot shows observed and predicted Cassava yields from the BLA. The predicted yield was the minimum prediction based on biophysical factors. Green and red vertical segments indicate the magnitude of the UYG and the IYG, respectively. The larger is the relative distance of the red line in comparison to the green one, the greater will be the fraction of total yield gap that is actually explained by the considered x-variables. Dots below the line 1:1, correpond to the same points shown above the same line in the previous plot. 
 
