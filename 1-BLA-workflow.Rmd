@@ -35,37 +35,13 @@ ___
 
 # **Introduction**
 
-**Please review my text carefully and modify whatever you consider necessary**
+Boundary line analysis is a powerful concept in agronomy [@Webb1972] as it can be used to explain yield gaps in farmers' fields. From a conceptual standpoint, different approaches have been proposed for boundary line analysis over the past decades, which can be grouped in three main methodological families. The first estimates the boundary lines “manually and by eye” (e.g., @FrenchSchultz1984). The second relies on statistical methods, encompassing grouping data and fitting ‘splines’, to estimate the boundary line (e.g., @Fermont2009). Lastly, econometric techniques including quantile regression and stochastic frontier analysis have also been used to estimate boundary lines (e.g., @Silva2017).
 
-Sustaining food production in the years ahead will require productivity gains in resource use. Specific challenges include estimating the magnitude and thus the value of yield gaps, identifying limiting factors, and implementing profitable and sustainable  strategies. Closing yield gaps in arable farming, while improving resource use  efficiency, is also expected to minimize the expansion of arable land and emissions while reducing other undesirable externalities. 
+Herewith, we focused on the boundary line approach encompassing grouping data and fitting of ‘splines’ to farmer field data. The general features of this approach include (1) identification of boundary points, (2) estimation of a continuous function characterizing the boundary points, and (3) yield gap analysis for each factor and across factors. This type of boundary line analysis has been used widely in the past years across a number of crops and geographies (e.g., @Casanova1999; @Shatar2004; @Fermont2009; @Wairegi2010). Its statistical nature (e.g., @Fermont2009) makes it suitable for reproducible research and easy to interpret by agronomists.
 
-Over the last years, new methodological approaches have been evolving within the context of yield gap assessment, mostly due to advances in data engineering and programming languages. One clear example is the mathematical computation of boundary-lines over crop yield datasets to decompose yield gaps (INCLUDE SOME REFERENCES, e.g., Silva et al.). The boundary-line analysis (BLA), based on the Law of the Minimum, is a powerful concept in agronomy which can be used for quantitative decomposition of yield gaps. The BLA is considered a useful complement to more traditional data analysis techniques. From a conceptual point of view, different approaches to fit boundary lines on crop data have been proposed throughout the last century. Five different methodological families can be identified:
+The use of the method for yield gap decomposition was best described by @Wairegi2010. After estimating boundary lines for individual production factors, von Liebig’s law of the minimum is used to identify the production factor limiting crop yield most. This is done for each field as Ymin = min(Yx1, Yx2, ..., Yxn), where Yxn is the yield predicted with the boundary line for a given production factor. Estimation of Ymin allows identifying the limiting factor to crop yield and decomposing the yield gap into an 'identified yield gap' (IYG) and an 'unexplained yield gap' (UYG) in each field. IYG is defined as the difference between the water-limited yield and the Ymin. UYG is defined as the difference between Ymin and the reported actual yield.
 
-1.	Curves fitted “manually and by eye” (e.g., French & Schultz, 1984);
-2.	The use of crop simulation modelling for benchmarking potential yields (e.g., Passioura & Angus, 2010);
-3.	Empirically based methods: grouping data and use ‘splines’ (e.g., Fermont el al., 2009);
-4.	Econometrics based on the use of quantile regression analysis (e.g., Grassini et al., 2015);
-5.	Stochastic frontier analysis (e.g., Silva et al., 2017);
-
-Herewith, we focused on the ‘groups and splines’ methodological family due to the following reasons:  
-
-•	High popularity in literature (e.g., Casanova et al.);
-•	Purely statistical and comprehensible approach (Fermont et al.) of plausible implementation with a R-notebook structure.
-•	Not based on ’machine learning’ methods neither crop simulation modelling which would require more complex computation.
-•	Easier adoption and implementation by agronomists and scientists working on crop production or research. 
-
-The ‘group and spline’ BLA method is defined by the following general features:
-
-•	To identify the boundary points;
-•	To fit a continuous function at these points;
-•	To estimate the yield gap for each production factor;
-•	To identify the most limiting factor, by analogy with von Liebig’s law of the minimum, and decompose the yield gap for each field;
-
-The yield gap decomposition can be implemented according to the method described by Wairegi et al. (2010). This method assumes responses according to von Liebig’s law of the minimum, and identifies the minimum predicted yield (Ymin) for each field as Ymin= Min(Yx1,Yx2,...,Yxn), where Yx is the corresponding BLA predicted yield for a given X-variable. The identified yield gap (IYG) is defined as the difference between the maximum attainable yield and the Ymin. The unexplained yield gap (UYG) is defined as the difference between Ymin and observed yield. The BLA serves to rank yield-constraints and to deliver a quantitative estimation of the technical issues causing yield gaps. In locations where biotic constraints are particularly important, the BLA seems to predict yields less accurately due to the higher interactions between constraints. Therefore, only the IYG can be associated with the variation of the corresponding independent variable X, which is determined by the lowest BLA-predicted yield as defined by the law of the minimum. 
-
-This approach has been successfully used for yield gap assessment in cereal-based systems (e.g.Casanova et al., 1999; Shatar and McBratney,2004), but also for other crops such as Cassava (Fermont et al., 2009). Cassava yields in Africa are small and it remains unclear which factors most limit yields. Using a series of farm surveys and trials in Uganda and western Kenya, Fermont el al. (2009) evaluated the importance of abiotic, biotic and associated crop management constraints for cassava production. Fermont et al. (2009) started by sorting the independent variables and removing outliers. Then, BLA was used that represent the maximum yield response (the dependent variable) to the various independent variables considered. 
-
-Here, we aim to replicate the concept of analysis conducted by Fermont et al. (2009) on the same original dataset by developing an automated analytical algorithm in R computing language. Clear boundary lines were identified in the scatter plots relating soil fertility, soil texture, pest and disease, weed management and selected rainfall variables to cassava yield. 
+This workflow documents in a reproducible way the concept of boundary line analysis of @Fermont2009 on the original dataset for cassava cropping systems in Eastern Africa. @Fermont2009 conducted a number of household surveys and on-farm trials in Uganda and western Kenya to unravel the importance of abiotic, biotic and associated crop management constraints to cassava production. Clear boundary lines between cassava yield and growing season rainfall, soil fertility, soil texture, and pest, disease and weed management practices, which were identified as the key constraints to cassava production in East Africa.  
 
 ___
 
@@ -89,22 +65,7 @@ ___
 
 # **Crop field data**
 
-The first step is to load the crop data to be used for yield gap analysis. The dataset contains reported observed yields, management practices, and biophysical conditions at field level (Fermont et al., 2009). 
-
-The farm surveys and agronomic trials were carried out in arange of sites in western Kenya and central and eastern Uganda. The sites were chosen to represent a range of environments andmanagement practices in cassava-based cropping systems. In total, 13 different yield-explaining variables (x-variables) were collected for a total number of 122 fields. The following x-variables are used: 
-
-1. "pH_soil"
-2. "SOC"
-3. "totN_soil"
-5. "P_soil"
-6. "K_soil"
-7. "CBB_T0_9"
-8. "CGM_T0_9"
-9. "RF_tot"
-10. "RF0_6M"
-11. "RF_.d"
-12. "clay"
-13. "days_to_harvest"
+The first step is to load the crop data to be used for yield gap analysis. The dataset contains measured cassava yields, management practices, and biophysical conditions for a number of fields in Central/Eastern Uganda and Western Kenya [@Fermont2009]. The sites were chosen to represent a range of environments and management practices of cassava-based cropping systems in Eastern Africa. In total, 13 different yield-explaining variables (x-variables) were collected for a total number of 122 field-year combinations. 
 
 ```{r}
 # read .csv file with data
@@ -119,7 +80,7 @@ ___
 
 # **Data manipulation**
 
-Here we subset all numeric independent variables by considering all points with yield values above '30 ton/ha' as outliers.
+In the chunk of code below, we exclude observations with cassava yields above 30 t/ha based on the yield distribution observed in the data.
 
 ```{r}
 # remove outliers
@@ -130,7 +91,7 @@ ___
 
 # **Descriptive statistics**
 
-Descriptive statistics of the actual yield and crop management variables used in the analysis for the 2 years of the analysis are provided below. Actual yield of Cassava across the study region was on average 13.9 t/ha. Local soils are relatively acidified (average pH < 5.8) and season rainfall was on average 1728 mm. Soil clay content and soil organic C were on average 27.2% and 10.5 mg/kg, respectively.  
+Descriptive statistics of actual cassava yield and crop management practices over the two cropping seasons used in the analysis are provided below. The actual yield of cassava across the study region was on average 13.9 t/ha. Local soils were moderately acidic (pH < 5.8) and growing season rainfall was on average 1728 mm. Soil clay content and soil organic C were on average 27.2% and 10.5 mg/kg, respectively.  
 
 ```{r, echo=FALSE, warning=FALSE}
 vars3 <- c('year', 'RF_tot', 'clay', 'pH_soil', 'SOC', 'days_to_harvest', 'yld_t0')
@@ -180,14 +141,11 @@ ___
 
 # **Step 1: Field selection**
 
-This function categorizes the X-variable in 10 groups and it fits a non-linear reg. through these selected Xi and Y values (i.e., spline model). We fit a boundary line according to Fermont et al. (2009), which belongs to the methodological family of 'group + splines regressions'. This is mostly based on the use of 'Log functions' as originally proposed by Webb. (1972), Casanova et al. (1999) and Shatar & Mcbratney. (2004).
+The function in the next chunk of code was developed to categorize the x-variable into 10 groups with the same number of observations and to obtain the maximum yield (ymax) for each group. The latter can be obtained with two approaches. The first, **maximum**, defines ymax as the maximum yield observed in each of the 10 groups. The second, **95_quantile**, defines ymax as the average actual yield in the top 5th quantile of the yield distribution. The selection of the most appropriate approach depends on the yield variability within each of the 10 groups and on the error associated with the fitted boundary line (see next section). 
 
-Two different approaches to identify the ymax are available in the following code chunk: 
+In our view, the selection of ymax based on the absolute maximum yield observed in each group is more appropriate for denser scatters where no clear outliers in crop yield can be identified. Defining ymax based on the top 5th quantile of actual yields for each group is a more conservative approach, suitable for datasets with potential outliers in crop yield. In such cases, the mean actual yield in the top 5th quantile will reduce the individual weight of single observations, which might be overestimated. 
 
-1) ymax defined by the absolute maximum.
-2) ymax defined by the mean of the highest quantile. 
-
-The selection of the most appropriate option depends on the vertical scatter at the highest yield levels and whether the obtained BL error is acceptable or not. In our perspective, the selection of ymax based on the absolute maximum is more appropriate for denser scatters, where the maximum values approximate the main cloud of observations. The second option, which uses the highest quantile, can be a more conservative option, and a better alternative for situations when a large dispersion of individual maximum yields takes place. For those cases, the mean of the highest quantile will reduce the individual weigth of single points, which could be overestimated. It is important to note that BLA based on splines tends to underestimate ymax for most initial x-intervals (i.e., where 'y' responds largely to a variation of 'x'). In this sense, the use of the mean of the highest quantile should be avoided everytime there is enough confidence on the reported y values.  
+It is important to note that boundary lines estimated with splines tend to underestimate ymax for most initial x-intervals (i.e., where 'y' shows a large response to a variation of 'x'). Thus, the use of the mean actual yield of the top 5th quantile should be avoided every time there is enough confidence on the reported 'y' values.  
 
 ```{r, warning=FALSE}
 bl_points <- function(df, xvar, approach){
@@ -254,26 +212,16 @@ ___
 
 # **Step 2: Boundary lines**
 
-First, we select the variables for which BL will be fitted. 
+The first step to fit a boundary line is to select the independent variables of interest. Independent variables with a discrete distribution should be avoided as these won't allow for a reliable estimation of ymax for a range of x-values. The variables 'CAD_T0_9', 'RF_tot', 'RF0_6M', 'RF_.d' and 'days_to_harvest' in the dataset of @Fermont2009 do not have a continuous distribution of values, which is problematic for boundary line analysis because many observations would be associated with the same ymax. Therefore, we decided not to include these variables from the analysis presented here.
 
-We should avoid using variables following a discrete distributions of 'x' values. The variables 'CAD_T0_9', 'RF_tot', 'RF0_6M', 'RF_.d' and 'days_to_harvest' in Fermont et al. (2009) do not show a continuous distribution of values as these are distributed over a limitted group of X-classes. This is problematic for BLA because many observation points would be associated with the same y_predicted. The most clear case is 'CAD_T0_9' where almost all points are equal to zero. This results in an excessive concentration of points around the same y_predicted (x=0). Therefore, we decided to remove all these variables from the yield decomposition analysis.
-
-For the selection of variables, we recommend the following two 'rules of thumb': 
-
-1) Avoid the use of uncontinuous x-variables (i.e., discrete, partially classified, excessive skewness of x-data).
-
-2) Avoid the use of variables for which the BL shows an excessive root mean square error. If the predictive model has a large error it shouldn't be used. The error levels should be similar among the selected boundaries and x-variables. In this specific case, we established a minimum error threshold for adoption of rmse < 3.5 ton/ha.
+We recommend the following two 'rules of thumb' when selecting independent variables for boundary line analysis. Firstly, the use of non-continuous x-variables (i.e., discrete, partially classified, excessive skewness of x-data) should be avoided. Secondly, the error of the fitted boundary line models should be similar across independent variables. Variables for which the boundary line has an excessive root mean square error should thus be avoided, as the fitted model does not describe the variability in the boundary points properly. In this specific case, we established a minimum root mean square error of 3.5 t/ha for inclusion of a variable in the yield gap analysis.
 
 ```{r, warning=FALSE}
-# We rejected all variables not complying with the previous two rules
-#variaveis <- c("pH_soil", "SOC", "totN_soil", "P_soil", "K_soil", "CBB_T0_9",
-               #"CGM_T0_9", "RF_tot", "RF0_6M", "RF_.d", "clay", "days_to_harvest")
-               
-# We decide to move forward with only four variables               
-variaveis <- c("pH_soil", "totN_soil", "P_soil", "clay")
+# four variables considered for illustrative purposes               
+variables <- c("pH_soil", "totN_soil", "P_soil", "clay")
 ```
 
-Second, we create empty dataframes to bind all the new data generated in the loop below. 
+Before estimating the boundary lines in the next chunk of code, we create empty dataframes to bind all the new data generated in the for loop used for this purpose. 
 
 ```{r, warning=FALSE}
 blp_new <- c()
@@ -281,14 +229,16 @@ data_new <- c()
 rmse_df <- c()
 ```
 
-The following loop is divided into six subsequent steps. The loop is used to create a new column (i) in the corresponding dataframes for each x-variable (i) that is selected (STEP 1). The new column (i) stores the corresponding BL points selected through the approach "maximum" (STEP 2). For each cluster of BL points, the predictive model is created (STEP 3). Then, the predictive model is used to estimate to y_max in two different data frames (STEP 4): one data frame includes only the BL points ("data.bla") and the other includes all the observation points ("data_subset"). After adding a new column (y_pred) to each dataframe, the root mean square error ("rmse") is computed on the small dataframe, wich is used to compare the maximum observed yields against the maximum predicted yields by the BL (STEP 5). Finally, all complete dataframes (each "data_subset" for each i-variable) are binded together (STEP 6). Three final tables are produced: 
+A generic six-step procedure, documented in the chunk of code below, was implemented to estimate boundary lines for individual production factors. In **step 1**, a new column is created in the dataframe of each production factor. In **step 2**, this new column stores the corresponding boundary lines points selected through the approach "maximum". A statistical model is fitted to the data using glm() in **step 3** for each group of boundary line points. The fitted model is further used in **step 4** to estimate ymax and to store its values in the dataframe containing the original data ("data_subset") and in the dataframe created for each production factor ("data.bla"). After adding a new column ('y_pred') to both dataframes, the root mean square error ("rmse") is computed in **step 5** to compare the maximum observed yields against the maximum predicted yields by the boundary line. Finally, dataframes are bound together in **step 6**. Three dataframes are produced with this procedure: 
 
-1. "blp_new": only the BL points (one column with the observed yields plus n columns, each showing the predicted y_max for each i variable).
-2. "data_new": all points (one column with the observed yields plus n columns, each showing the predicted y_max for each i variable).
-3. "rmse_df": all the rmse (one column associated with each BL for each i-variable).
+* "blp_new" includes only the boundary line points (one column with the observed yields plus n columns, each showing the predicted ymax for each i variable);
+
+* "data_new" includes all observations as per the original data (one column with the observed yields plus n columns, each showing the predicted ymax for each i variable);
+
+* "rmse_df" including the root mean square errors estimated for the boundary lines fitted for each production factor (one column associated with each boundary line for each i-variable).
 
 ```{r, warning=FALSE}
-for(i in unique(variaveis)){
+for(i in unique(variables)){
   # print(i)
   
   # 1) select data
@@ -297,11 +247,11 @@ for(i in unique(variaveis)){
   colnames(data_subset)[6] = "X"
   data_subset$variable <- i
   
-  # 2) estimate BL points
+  # 2) estimate boundary line points
   data.bla <- bl_points(data, i, approach="maximum")
   data.bla$variable <- i
   
-  # 3) create the predictive model
+  # 3) create predictive model
   model <- glm(Y ~ ns(X, df = 2), data = data.bla)
   # print(model)
   
@@ -311,28 +261,8 @@ for(i in unique(variaveis)){
   # raw data
   data_subset$y_pred <- predict(model, newdata = data_subset)
 
-  # 5) ERROR assessment
+  # 5) error assessment
   rmse_value <- rmse(data.bla$Y, data.bla$y_pred)
-  
-  # For plotting the BLA outcomes
-  plot_lims <- range(data_subset$X, na.rm=T)
-  plot.grid <- seq(from=plot_lims[1], to=plot_lims[2])
-  pred <- predict(model, newdata=list(X=plot.grid), se=T)
-  spline.d <- as.data.frame(spline(data.bla$X, data.bla$y_pred))
-  xmin <- min(data_subset$X)
-  xmax <- max(data_subset$X)
-  ymax <- max(data_subset$Y)
-  g1 <- ggplot(data.bla, aes(x=X, y=y_pred)) + 
-    geom_point(size=6, alpha=0.6, color="blue") +
-    geom_point(data=data.bla, aes(x=X, y=Y), size=3, alpha=0.9, color="red") +
-    geom_point(data=data_subset, aes(x=X, y=Y)) +
-    coord_cartesian(xlim=c(xmin-2, xmax), ylim=c(0, ymax+5)) + 
-    labs(title="BOUNDARY LINE ", subtitle="Spline method - Shatar & Mcbratney. (2004)", y="YIELD_tha",
-         x="X", caption="[BL from 10 groups]") + 
-    theme_bw() + 
-    theme(text = element_text(size=15)) +
-    geom_line(data = spline.d, aes(x = x, y = y), alpha=0.6, color="blue", size=2)
-  print(g1)
   
   # 6) bind all data together 
   blp_new <- rbind(blp_new, data.bla)
@@ -340,20 +270,40 @@ for(i in unique(variaveis)){
   rmse_df <- rbind(rmse_df, cbind(i, rmse_value))}
 ```
 
+The boundary line fitted between cassava yield and soil pH in water is illustrated below. 
+
+```{r, warning=FALSE, fig.height=4.5, fig.width=5}
+# subset for variable of interest
+pH <- subset(blp_new, variable =='pH_soil')
+pH <- pH[order(pH$X),]
+pH_original <- subset(data_new, variable =='pH_soil')
+
+# make plot
+par(mfrow=c(1,1), mar=c(5,5,1,1), las=1, xaxs='i', yaxs='i', cex.axis=1.1, cex.lab=1.2)
+plot(pH$X, pH$y_pred, ylim=c(0,30), xlab='Soil pH in water', ylab='Cassava yield (t/ha)')
+lines(pH$X, pH$y_pred, lty=1, col='darkblue', lwd=2.5)
+points(pH$X, pH$y_pred, pch=21, cex=1.5, col='darkblue', bg='royalblue')
+points(pH$X, pH$Y, pch=21, cex=1.75, col='darkred', bg='orangered')
+points(pH_original$X, pH_original$Y, pch=21, cex=1, col='black', bg='black')
+legend('bottomright', legend=c('Observations', 'Boundary points', 'Boundary line'),
+       lty=c(NA,NA,1), pch=c(21,21,21), 
+       col=c('black', 'orangered', 'darkblue'), pt.bg=c('black', 'orange', 'royalblue'))
+```
+
 ___
 
-# **Step 3: Yield gap analysis**
+# **Step 3: Yield gap decomposition**
 
-First, the data frame is reshaped to estimate the y_pred_min and the corresponding limiting factor (i.e., the corresponding x-variable with the lowest BL predicted yield for a certain observed yield).
+The first step for the yield gap analysis is to obtain ymin and the corresponding limiting factor (i.e., the corresponding x-variable with the lowest BL predicted yield for a certain observed yield) for each field. This is done with the chunk of code below.
 
 ```{r, warning=FALSE}
 # reshape df
 data_ygd <- dcast(data_new, year + Trial + Site + Farm.no. + Y ~ variable, value.var='y_pred') 
-data_ygd$y_pred_min = apply(data_ygd[6:9], 1, min) 
-data_ygd$factor_limitante = names(data_ygd[6:9])[apply(data_ygd[6:9], 1, which.min)]
+data_ygd$y_pred_min <- apply(data_ygd[6:9], 1, min) 
+data_ygd$limiting_factor <- names(data_ygd[6:9])[apply(data_ygd[6:9], 1, which.min)]
 ```
 
-Second, we estimate the 'identified' yield gap (IYG) and the 'unexplained' yield gap (UYG) according to Wairegi et al. (2010). 
+Following, we estimate the 'identified yield gap' (IYG) and the 'unexplained yield gap' (UYG) according to @Wairegi2010. 
 
 ```{r, warning=FALSE}
 # decompose yg
@@ -361,90 +311,60 @@ data_ygd$IYG <- max(data_ygd$Y, na.rm=T) - data_ygd$y_pred_min
 data_ygd$UYG <- data_ygd$y_pred_min - data_ygd$Y
 ```
 
-Third, we plot the yield gap decomposition figure and the graphic is interpreted.
+Now that we have the IYG and UYG for each field, we can plot and interpret the results. The plot below shows the observed and the predicted cassava yields for the dataset of @Fermont2009. Predicted yields correspond to the minimum yield predicted by all the boundary lines estimated in this workflow. The diagonal solid lines show the 1:1 and 1:2 lines, differentiating fields with no yield gaps (below the 1:1 line), fields with moderate yield gaps (between 1:1 and 1:2 lines), and fields with large yield gaps (above the 1:2 line). The table shows the number of fields affected by a given limiting factor. 
 
-The first plot shows predicted versus observed cassava yields for the 2004 and 2005 trials. Predictions correspond to the minimum yield predicted by all the boundary lines considered. Diagonal solid lines represent the 1:1 and 2:1 lines, which indicates yield gap zones (i.e., zero to 100% gap and 100% to 200% gap). Points above the 1:1 line correspond to observed yields greater than the corresponding predictions. Those are points to which the useability of this approach fails. Those points indicate the general trend of BL for underpredicting the maximum yield on about 1/5 of the observations.
+```{r, warning=FALSE, fig.height=4.5, fig.width=5}
+# plot yield gaps
+par(mfrow=c(1,1), mar=c(5,5,1,1), las=1, xaxs='i', yaxs='i', cex.axis=1.1, cex.lab=1.2)
+plot(data_ygd$Y, data_ygd$y_pred_min, xlim=c(0, 30), ylim=c(0, 30), xlab='Observed yield (t/ha)', ylab='Predicted yield (t/ha)')
+points(data_ygd$Y, data_ygd$y_pred_min, pch=21, cex=1, col='black', bg='grey')
+abline(a=0, b=1, lty=1)
+abline(a=0, b=2, lty=2)
 
-The second plot shows observed and predicted Cassava yields from the BLA. The predicted yield was the minimum prediction based on biophysical factors. Green and red vertical segments indicate the magnitude of the UYG and the IYG, respectively. The larger is the relative distance of the red line in comparison to the green one, the greater will be the fraction of total yield gap that is actually explained by the considered x-variables. Dots below the line 1:1, correpond to the same points shown above the same line in the previous plot. 
-
-```{r, warning=FALSE}
-# plot 1
-plot(data_ygd$y_pred_min, data_ygd$Y, xlim=c(0, 35), ylim=c(0, 35))
-abline(a=0, b=1)
-abline(a=0, b=0.5)
-
-# plot 2
-ggplot(data_ygd, aes(x=Y, y=data_ygd$y_pred_min, ymax = data_ygd$y_pred_min+IYG)) + 
-  geom_point(size=2.5, alpha=0.6, color="blue") +
-  geom_abline() +
-  geom_pointrange(aes(ymin = y_pred_min, ymax = y_pred_min+IYG), data = data_ygd, width = 0.2, size=0.1, linetype='dashed', col = 'red')+
-  geom_pointrange(aes(ymin = y_pred_min-UYG, ymax = y_pred_min), data = data_ygd, width = 0.2, size=0.1, linetype='dashed', col = 'green')+
-  # Coords and axis limits
-  geom_hline(yintercept=max(data_ygd$Y), size=1, linetype='dashed', col = 'red')+
-  geom_hline(yintercept=0, linetype='dotted', col = 'red')+
-  geom_vline(xintercept=0, linetype='dotted', col = 'red')+
-  coord_cartesian(xlim=c(0, max(data_ygd$Y)), ylim=c(0, max(data_ygd$Y))) + 
-  labs(title="Yield gap decomposition", subtitle="Following the method of Wairegi et al. (2010)", y="Predicted crop yield Y [t/ha]",
-       x="Observed crop yield X [t/ha]", caption="") + theme_bw() + theme(text = element_text(size=15))
-
+# see limiting factors
+table(data_ygd$limiting_factor)
 ```
 
+We now plot the same figure as above, but highlighting the **IYG** (green segments) and the **UYG** (red segments). The larger the relative distance of the red line in comparison to the green one, the greater the fraction of total yield gap that was explained by the production factors considered in the analysis. Please note the maximum yield is assumed to be the maximum observed yield (upper horizontal line); yet, such value should be replaced by the respective potential or water-limited yield for irrigated or rainfed crops.  
+
+```{r, warning=FALSE, fig.height=4.5, fig.width=5}
+# plot IYG and UYG
+par(mfrow=c(1,1), mar=c(5,5,1,1), las=1, xaxs='i', yaxs='i', cex.axis=1.1, cex.lab=1.2)
+plot(data_ygd$Y, data_ygd$y_pred_min, xlim=c(0, 30), ylim=c(0, 30), xlab='Observed yield (t/ha)', ylab='Predicted yield (t/ha)')
+abline(a=0, b=1, lty=1)
+abline(a=0, b=2, lty=2)
+abline(h=max(data_ygd$Y), lty=1, col=2, lwd=1.5)
+segments(x0=data_ygd$Y, x1=data_ygd$Y, y0=data_ygd$y_pred_min, y1=data_ygd$y_pred_min+data_ygd$IYG, lwd=0.7, lty=2, col='orangered')
+segments(x0=data_ygd$Y, x1=data_ygd$Y, y0=data_ygd$y_pred_min-data_ygd$UYG, y1=data_ygd$y_pred_min, lwd=0.7, lty=2, col='forestgreen')
+points(data_ygd$Y, data_ygd$y_pred_min, pch=21, cex=1, col='black', bg='grey')
+legend('bottomright', legend=c('Identified yield gap', 'Unexplained yield gap'), lty=2, lwd=2, col=c('forestgreen', 'orangered'))
+```
 ___
 
 # **Recommendations**
 
-**Please decide how to rephrase these bullets in order to sound less conclusive... but in general these were what I most learnt**
+The main **advantages** of boundary lines for yield gap analysis can be summarized as follows:
 
-The main advantages of BLA are the following:
+*	The method is empirically based and of easy interpretation to agronomists, allowing for reproducible research.
+* Robust statistical techniques can be used to fit boundary lines to farmer field data with little computation requirements.
+*	A minimum of two variables are needed to apply the method (i.e., crop yield plus an additional explaining variable).
+*	The approach does not require a large dataset, if biophysical and management conditions are properly captured with data collection. 
+*	Our experience indicates that sample size should be in the range of hundreds of field-year observations when dealing with homogeneous biophysical conditions.
 
-•	Empirically based and comprehensible.
-•	Lighter computation requirements.
-•	Open-source code can be used for implementation (e.g., R-script).
-•	Solid web supply of information regarding code functions and libraries to be used.
-•	A minimum of two variables are needed (i.e., yield is mandatory plus an additional explaining variable).
-•	It does not necessarily require a huge dataset if edaphoclimatic and technological conditions are properly segmented. 
+The main **disadvantages** of boundary line anaysis can be summarized as follows:
 
-
-The main disadvantages of BLA are the following:
-
-•	It still requires a relatively large dataset (at least N > 100).
-•	The independent variable must cover a wide range of variation, with multiple combinations of Y vs. independent variable within each group of X-variable. 
-•	It requires solid control of outliers, mostly on the Y-axis. The error of measured yields must be minimal. Otherwise, the "maximum" approach must be substituted by the "highest_quantile" one, and our experience indicates that this tends to result in a underestimation of the predicted y_max. 
-•	The interpretability of the data cannot be purely statistical as the patterns of the 'splines' need to be contextualized through agronomic knowledge. 
-•	X-variables with discrete distributions (or X-zero values) must be kept out of this kind of analysis. These may still be used for segmentation of data but its applicability depends largely on the total amount of data and the size of each generated subset of data.
-•	Reclassification or segmentation of data according to technological characteristics of the production system (e.g., irrigated vs. rainfed) must be conducted. This implies that even larger datasets are needed when dealing with heterogeneous data in terms of geographic locations, climatic variation, cultivars, or agronomy. Theoretically, this rule would apply to all x-variables which are not entirely independent. However, one majour point of concern is the enormous difficulty that is to identify which variables play an absolutely independent role in crops performance. This is far from being an easy task and that is why we highlight the importance of mechanistic knowledge on crop science to guide the use of this method and the interpretability of results.  
-•	Our experience indicates that dataset size must be comprehended between hundreds of observations, when dealing with homogeneous data in terms of agronomy and climate, but this threshold can increase easily to more than a few thousand of observations when climate and agronomy vary. 
-
+*	The method requires a thorough control of outliers, particularly on crop yield. Thus, the error of measured yields must be minimal. If this cannot be ensured then boundary points should be identified as the top 5th quantile of actual yields, rather than as the maximum yield, within each group of the independent variable.
+*	The interpretability of the data cannot be purely statistical as the patterns of the 'splines' need to be contextualized through agronomic knowledge.
+* Independent variables must cover a wide range of variation, i.e., they must show a considerable range of values and accommodate a large variation in crop yield after being segmented in smaller groups. 
+*	The segmentation of x-variables into groups with a similar number of observations is somewhat arbitrary. The influence of such decision on final results must be checked.
+*	Independent variables with discrete distributions (or with a lot of zero values) cannot be considered in this type of analysis. These may still be used partitioning the dataset into homogeneous groups (e.g., irrigated vs. rainfed) depending on the sample of each subset.
 
 ___
 
 # **Acknowledgments**
 
-We thank Ken Giller (WUR-PPS) and Piet van Asten (Olam International) for sharing the original data showcased in this workflow. The development of this notebook was possible thanks to the financial support from the OneCGIAR initiative on *Excellence in Agronomy*. For further support and questions on how to implement this workflow to other data sets, or further thoughts on how to improve the theoretical framework used, are almost welcome and should be addressed to **j.silva@cgiar.org**.   
+We thank Ken Giller (WUR-PPS) and Piet van Asten (Olam International) for sharing the original data showcased in this workflow. The development of this notebook was possible thanks to the financial support from the OneCGIAR initiative on *Excellence in Agronomy*. For further support and questions on how to implement this workflow to other data sets, please contact J.V. Silva (**j.silva@cgiar.org**).   
 
 ___
 
 # **References**
-
-Casanova, D., Goudriaan, J., Bouma, J., Epema, G.F., 1999. Yield gap analysis in relation to soil properties in direct-seeded flooded rice. Geoderma 91, 191–216.
-
-Casanova, D., Goudriaan, J., Forner, M.M.C., Withagen, J.C.M., 2002. Rice yield prediction from yield components and limiting factors. Eur. J. Agron. 17, 41–61.
-
-French, R.J., Schultz, J.E., 1984. Water use efficiency of wheat in a Mediterranean-type environment. I. The relation between yield, water use and climate. Aust. J. Agric. Res. 35, 743–764.
-
-Fermont, A.M., van Asten, P.J.A., Tittonell, P., van Wijk, M.T., Giller, K.E., 2009. Closing the cassava yield gap: An analysis from smallholder farms in East Africa. Field Crops Res. 112, 24–36.
-
-Grassini, P., Torrion, J.A., Yang, H.S., Rees, J., Andersen, D., Cassman, K.G., Specht, J.E., 2015. Soybean yield gaps and water productivity in the western U.S. Corn Belt. Field Crops Res. 179, 150–163.
-
-Passioura, J.B., Angus, J.F., 2010. Chapter 2 - Improving Productivity of Crops in Water-Limited Environments, in: Sparks, D.L. (Ed.), Advances in Agronomy. Academic Press, pp. 37–75.
-
-Silva, J.V., Reidsma, P., Laborte, A.G., van Ittersum, M.K., 2017. Explaining rice yields and yield gaps in Central Luzon, Philippines: An application of stochastic frontier analysis and crop modelling. Eur. J. Agron. 82, 223–241.
-
-Shatar, T.M., Mcbratney, A.B., 2004. Boundary-line analysis of field-scale yield response to soil properties. J. Agric. Sci. 142, 553–560.
-
-Wairegi, L.W.I., van Asten, P.J.A., Tenywa, M.M., Bekunda, M.A., 2010. Abiotic constraints override biotic constraints in East African highland banana systems. Field Crops Res. 117, 146–153.
-
-Webb, R.A., 1972. Use of the Boundary Line in the analysis of biological data. J. Hortic. Sci. 47, 309–319.  
-
-
-
