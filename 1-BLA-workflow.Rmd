@@ -292,7 +292,7 @@ legend('bottomright', legend=c('Observations', 'Boundary points', 'Boundary line
 
 ___
 
-# **Step 3: Yield gap decomposition**
+# **Step 3: Yield gap analysis**
 
 The first step for the yield gap analysis is to obtain ymin and the corresponding limiting factor (i.e., the corresponding x-variable with the lowest BL predicted yield for a certain observed yield) for each field. This is done with the chunk of code below.
 
